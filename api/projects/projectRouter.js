@@ -120,5 +120,39 @@ router.post('/:id/tasks', (req, res) => {
   });
 });
 
+router.get('/:id/resources', (req, res) => {
+  const { id } = req.params;
+  Projects.getProjectById(id)
+    .then(project => {
+      if (project) {
+      Projects.getResourcesByProjectId(id)
+        .then(projectResources => {
+          if (projectResources.length) {
+            res.json(projectResources);
+          } else {
+            res.status(404).json({ message: 'Could not find resources for given project' })
+          }
+        })
+        .catch(err => {
+          res.status(500).json({ message: 'Failed to get resources' });
+        });
+      }else {
+        res.status(404).json({ message: 'Could not find project' })
+      }
+    })
+});
+
+router.post('/:id/resources', (req, res) => {
+  const projectResourceData = req.body;
+
+  Projects.assignProjectResource(projectResourceData)
+  .then(projectResource => {
+    res.status(201).json(projectResource);
+  })
+  .catch (err => {
+    res.status(500).json({ message: 'Failed to create new project resource' });
+  });
+});
+
 
 module.exports = router;
